@@ -1,48 +1,86 @@
+import glob, os
 from tkinter import filedialog
 from tkinter import *
 
-base = Tk() #Base del programa, gui
+##Agradecimientos: 
+# 
+#  
+#   https://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter
 
-#Variables globales que almacenan el path de las carpetas.
+#Variables globales 
+pathCarpetaD=""
+pathCarpetaF=""
 
-pathCarpetaF = StringVar()
-pathCarpetaD = StringVar()
+
+class Sync(Tk):
+    def __init__(self):
+        Tk.__init__(self)
+        self._frame = None
+        self.cambiarVentana(VentanaInicio)
+        
+
+    def cambiarVentana(self, frame_class): #Elimina pantalla base y crea la siguiente
+        new_frame = frame_class(self) 
+        if self._frame is not None: 
+            self._frame.destroy()
+        self._frame = new_frame
+        self._frame.pack()
 
 
-#Funciones 
-def seleccionarCarpetaD():
-    global pathCarpetaD
-    pathCarpetaD.set(filedialog.askdirectory(initialdir="/",  title='Seleccionar directorio'))
 
-def seleccionarCarpetaF():
-    global pathCarpetaF
-    pathCarpetaF.set(filedialog.askdirectory(initialdir="/",  title='Seleccionar directorio'))   
+class VentanaInicio(Frame): #Clase de pantalla de inicio
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        global pathCarpetaD
+        global pathCarpetaF
 
-#Etiquetas
-eCarpetaFuente = Label(base, text="Carpeta Fuente")
-eDestino = Label(base, text="Destino")
+        #Funciones
+        def seleccionarCarpetaD():
+            global pathCarpetaD
+            pathCarpetaD = filedialog.askdirectory(initialdir="/",  title='Seleccionar directorio')
 
-#botones
-boton1 = Button(base, text = "Seleccionar Carpeta", command = seleccionarCarpetaF) #seleccionar carpeta fuente
-boton2 = Button(base, text = "Seleccionar Carpeta", command = seleccionarCarpetaD) #seleccionar carpeta destino
-botonSig =  Button(base, text = "Siguiente", command = seleccionarCarpetaD) #Botón siguiente
+        def seleccionarCarpetaF():
+            global pathCarpetaF
+            pathCarpetaF = filedialog.askdirectory(initialdir="/",  title='Seleccionar directorio') 
+        
 
-#entradas
-entradaCD = Entry(base, textvariable = pathCarpetaD)
-entradaCF = Entry(base, textvariable = pathCarpetaF)
+        #Etiquetas
+        eCarpetaFuente = Label(self, text="Carpeta Fuente")
+        eDestino = Label(self, text="Destino")
+
+        #botones
+        boton1 = Button(self, text = "Seleccionar Carpeta", command = seleccionarCarpetaF) #seleccionar carpeta fuente
+        boton2 = Button(self, text = "Seleccionar Carpeta", command = seleccionarCarpetaD) #seleccionar carpeta destino
+        botonSig =  Button(self, text = "Siguiente", command = lambda: master.cambiarVentana(VentanaSync)) #Botón siguiente
+
+        #Orden de widgets en pantalla
+        eCarpetaFuente.grid(row = 1, column = 1)
+        eDestino.grid(row = 10, column = 1)
+       
+        boton1.grid(row = 1, column = 20)
+        boton2.grid(row = 10, column = 20)
+        botonSig.grid(row = 30, column = 30)
+        
+class VentanaSync(Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        global pathCarpetaF     #acceso a variable global que almacena path de carpeta fuente
+        listaCanciones = Listbox(self)      #Lista dinámica de canciones en carpeta
+        os.chdir(pathCarpetaF)      #se establece como path la carpeta fuente
+        for cancion in glob.glob("*.mp3"):
+            listaCanciones.insert(END,cancion)
+        listaCanciones.grid(row = 10, column =1)
+
+
+
+
 
 
 
 #posiciones GUI pantalla selección carpetas
 
-eCarpetaFuente.grid(row = 1, column = 1)
-eDestino.grid(row = 10, column = 1)
-boton1.grid(row = 1, column = 20)
-boton2.grid(row = 10, column = 20)
-botonSig.grid(row = 30, column = 30)
-
-entradaCF.grid(row = 1, column = 10)
-entradaCD.grid(row = 10, column = 10)
 
 
-base.mainloop()
+if __name__ == "__main__":
+    app = Sync()
+    app.mainloop()
