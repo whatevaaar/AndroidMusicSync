@@ -65,20 +65,17 @@ class VentanaSync(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         global pathCarpetaF     #acceso a variable global que almacena path de carpeta fuente
-        listaCanciones = Listbox(self)      #Lista dinámica de canciones en carpeta
+        lCanciones = [] #Lista de canciones encontradas
+        selecCanciones = []
         os.chdir(pathCarpetaF)      #se establece como path la carpeta fuente
-        for cancion in glob.glob("*.mp3"):
-            listaCanciones.insert(END,cancion)
-        listaCanciones.grid(row = 10, column =1)
-
-
-
-
-
-
-
+        cnt = 0
+        for cancion in glob.glob("*.mp3"): 
+            selecCanciones.append(StringVar())
+            lCanciones.append(cancion)
+            chkTemp = Checkbutton(self,text = cancion, textvariable = selecCanciones[cnt])
+            chkTemp.grid(row = cnt+1, column = 1)
+            cnt = cnt+1
 #posiciones GUI pantalla selección carpetas
-
 
 
 if __name__ == "__main__":
